@@ -21,7 +21,7 @@ should be a direct reference to the model class that data should be created for.
 
 - **quantity** How many instances of the model need adding to the database
 
-- **dependancies** A list of fixtures that this fixture depends on. The base for fixture runners can resolve dependancies to ensure fixtures are ruin in the correct order
+- **dependencies** A list of fixtures that this fixture depends on. The base for fixture runners can resolve dependencies to ensure fixtures are ruin in the correct order
 
 - **fields** This is a dictionary of field names to generator instances. The field name is the field of the model to be generated, where generator is a generator to be used (it is normal to instansiate the generator in the fields list)
 
