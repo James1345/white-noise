@@ -28,6 +28,26 @@ class LipsumGenerator(BaseGenerator):
     def generate(self):
         return get_sentence(True)
 
+class SequenceGenerator(BaseGenerator):
+    '''
+    Creates a generator that yeilds the next object in sequence each time it is called
+
+    If it runs out, it wraps back to the start.
+    Any iterable may be passed as `values`
+    '''
+    def __init__(self, values, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.values = values
+        self.iterator = iter(self.values)
+
+    def generate(self):
+        try:
+            return next(self.iterator)
+        except StopIteration:
+            self.iterator = iter(self.values)
+            return next(self.iterator)
+
+
 class LiteralGenerator(BaseGenerator):
     def __init__(self, value=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
