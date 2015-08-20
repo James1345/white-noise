@@ -29,6 +29,12 @@ should be a direct reference to the model class that data should be created for.
 
 Currently available generators (and their options)
 
+#### LiteralGenerator
+
+Returns a literal value that is passed
+
+- **value** The value to return
+
 #### RandomGenerator
 
 Creates a random string for the field
