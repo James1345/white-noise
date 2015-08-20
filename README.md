@@ -45,6 +45,18 @@ Creates a random string for the field
 
 Creates a random insulting sentence  string for the field
 
+#### sqlalchemy.SelectGenerator
+Selects an object from the database and uses that as the value for the field
+This is for creating objects with relationships to others in the database (e.g. foreign keys)
+
+This generator only works with the SQLAlchemy fixture runner. (if writting your own fixture runner
+it must receive an SQLAlchemy session object as well as its options)
+
+- **model** The foreign model to select from
+
+- **random** Select randomly or select the first (default => random)
+
+
 ### Fixture runners
 
 Currently only the *SQLAlchemy* Fixture Runner is available. This requires a reference to

@@ -14,6 +14,33 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
 
+random_user = Fixture(
+        dependencies = [],
+        model = User,
+        quantity = 6,
+        fields = {
+            'name': (RandomGenerator, {}),
+        }
+    )
+
+insult_user = Fixture(
+        dependencies = [],
+        model = User,
+        quantity = 3,
+        fields = {
+            'name': (InsultGenerator, {}),
+        }
+    )
+
+literal_user = Fixture(
+        dependencies = [],
+        model = User,
+        quantity = 4,
+        fields = {
+            'name': (LiteralGenerator, {'value': 'Hello World'}),
+        }
+    )
+
 class SQLAlchemyTest(TestCase):
 
     @classmethod
@@ -24,30 +51,9 @@ class SQLAlchemyTest(TestCase):
 
     def testFixtures(self):
         fixtures = [
-            Fixture(
-                dependencies = [],
-                model = User,
-                quantity = 6,
-                fields = {
-                    'name': (RandomGenerator, {}),
-                }
-            ),
-            Fixture(
-                dependencies = [],
-                model = User,
-                quantity = 3,
-                fields = {
-                    'name': (InsultGenerator, {}),
-                }
-            ),
-            Fixture(
-                dependencies = [],
-                model = User,
-                quantity = 4,
-                fields = {
-                    'name': (LiteralGenerator, {'value': 'Hello World'}),
-                }
-            )
+            random_user,
+            literal_user,
+            insult_user,
         ]
         SQLAlchemyFixtureRunner(self.session, fixtures).run()
         for instance in self.session.query(User):
