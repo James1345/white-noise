@@ -18,7 +18,7 @@ class BaseGenerator:
         raise NotImplementedError("Must be implemented by subclass")
 
 class InsultGenerator(BaseGenerator):
-    def generate():
+    def generate(self):
         return insult()
 
 class RandomGenerator(BaseGenerator):

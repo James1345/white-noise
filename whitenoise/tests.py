@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 
 from whitenoise.fixtures import SQLAlchemyFixtureRunner, Fixture
-from whitenoise.generators import RandomGenerator
+from whitenoise.generators import RandomGenerator, InsultGenerator
 
 Base = declarative_base()
 
@@ -18,7 +18,7 @@ class SQLAlchemyTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        engine = create_engine('sqlite:///:memory:', echo=True)
+        engine = create_engine('sqlite:///:memory:', echo=False)
         Base.metadata.create_all(engine)
         cls.session = sessionmaker(bind=engine)()
 
@@ -30,6 +30,14 @@ class SQLAlchemyTest(TestCase):
                 quantity = 6,
                 fields = {
                     'name': (RandomGenerator, {}),
+                }
+            ),
+            Fixture(
+                dependencies = [],
+                model = User,
+                quantity = 3,
+                fields = {
+                    'name': (InsultGenerator, {}),
                 }
             )
         ]
