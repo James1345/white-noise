@@ -6,8 +6,8 @@ class Fixture:
     and a dict of fields and generators
     '''
 
-    def __init__(self, dependancies, model, quantity, fields):
-        self.dependancies = dependancies
+    def __init__(self, dependencies, model, quantity, fields):
+        self.dependencies = dependencies
         self.model = model
         self.quantity = quantity
         self.fields = fields
@@ -15,28 +15,28 @@ class Fixture:
 class CircularDependancyException(Exception):
     pass
 
-class DependancyResolver:
+class DependencyResolver:
     '''
     Resolves dependencies, obviously
     '''
     def __init__(self, fixtures):
         self.fixtures = fixtures
 
-    def recurse_resolve(node, resolved, unresolved):
+    def recurse_resolve(self, node, resolved, unresolved):
         if node not in resolved:
             unresolved.append(node)
             for edge in node.dependencies:
                 if edge in unresolved:
                     raise CircularDependancyException("Circular dependancy detected %s" % edge)
-                recurse_resolve(edge, resolved, unresolved)
+                self.recurse_resolve(edge, resolved, unresolved)
             unresolved.remove(node)
             resolved.append(node)
 
-    def get_ordered_set():
+    def get_ordered_set(self):
         resolved = []
         unresolved = []
         for fixture in self.fixtures:
-            recurse_resolve(fixture, resolved, unresolved)
+            self.recurse_resolve(fixture, resolved, unresolved)
         return resolved
 
 
@@ -47,7 +47,7 @@ class FixtureRunner:
 
     def __init__(self, fixtures):
 
-        self.fixtures = DependancyResolver(fixtures).get_ordered_set()
+        self.fixtures = DependencyResolver(fixtures).get_ordered_set()
         if type(self) == FixtureRunner:
             # Disallow creation of the base class
             raise NotImplementedError("FixtureRunner MUST be subclassed")
@@ -68,7 +68,8 @@ class SQLAlchemyFixtureRunner(FixtureRunner):
     def apply_fixture(self, fixture):
         for _ in range(fixture.quantity):
             model_instance = fixture.model()
-            for field, (generator, options) in fixture.fields:
-                setattr(model_instance, field, generator(**options).generate)
+            for field, (generator, options) in fixture.fields.items():
+                options['session'] = self.session
+                setattr(model_instance, field, generator(**options).generate())
             self.session.add(model_instance)
             self.session.commit()
