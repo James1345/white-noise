@@ -51,3 +51,24 @@ class FixtureRunner:
         if type(self) == FixtureRunner:
             # Disallow creation of the base class
             raise NotImplementedError("FixtureRunner MUST be subclassed")
+
+    def run(self):
+        for fixture in self.fixtures:
+            self.apply_fixture(fixture)
+
+    def apply_fixture(self, fixture):
+        raise NotImplementedError()
+
+class SQLAlchemyFixtureRunner(FixtureRunner):
+
+    def __init__(self, session, fixtures):
+        super().__init__(fixtures)
+        self.session = session
+
+    def apply_fixture(self, fixture):
+        for _ in range(fixture.quantity):
+            model_instance = fixture.model()
+            for field, (generator, options) in fixture.fields:
+                setattr(model_instance, field, generator(**options).generate)
+            self.session.add(model_instance)
+            self.session.commit()
