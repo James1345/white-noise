@@ -49,6 +49,12 @@ Creates a semi-random string sentence of the Lorem Ipsum form
 
 Creates a random insulting sentence  string for the field
 
+#### SequenceGenerator
+
+Iterates over a sequence. Loops if the end of the sequence is reached.
+
+- **values** The values to use. Can be any iterable (lists, tuples, generators, etc.)
+
 #### sqlalchemy.SelectGenerator
 Selects an object from the database and uses that as the value for the field
 This is for creating objects with relationships to others in the database (e.g. foreign keys)
