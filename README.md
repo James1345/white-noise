@@ -12,13 +12,34 @@ The aim is to have a (mostly) consistant api for all generation.
 Fixtures define the data that should be entered into the database. Generators
 create the data and a fixture runner enters it.
 
+### Fixtures
+
 A fixture object takes 4 parameters.
 
-- *model* The model to be acted on. This
+- **model** The model to be acted on. This
 should be a direct reference to the model class that data should be created for.
 
-- *quantity* How many instances of the model need adding to the database
+- **quantity** How many instances of the model need adding to the database
 
-- *dependancies* A list of fixtures that this fixture depends on. The base for fixture runners can resolve dependancies to ensure fixtures are ruin in the correct order
+- **dependancies** A list of fixtures that this fixture depends on. The base for fixture runners can resolve dependancies to ensure fixtures are ruin in the correct order
 
-- *fields* This is a dictionary of field names to tuples. The field name is the field of the model to be generated, the tuple is of the form (generator, options), where generator is a generator class and options is a dictionary of options to pass to the generator's
+- **fields** This is a dictionary of field names to tuples. The field name is the field of the model to be generated, the tuple is of the form (generator, options), where generator is a generator class and options is a dictionary of options to pass to the generator's
+
+### Generators
+
+Currently available generators (and their options)
+
+#### RandomGenerator
+
+Creates a random string for the field
+
+- **length** The length of the field
+
+#### InsultGenerator
+
+Creates a random insulting sentence  string for the field
+
+### Fixture runners
+
+Currently only the *SQLAlchemy* Fixture Runner is available. This requires a reference to
+an SQLAlchemy session object, and a list of fixtures
