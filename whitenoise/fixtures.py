@@ -73,3 +73,11 @@ class SQLAlchemyFixtureRunner(FixtureRunner):
                 setattr(model_instance, field, generator(**options).generate())
             self.session.add(model_instance)
             self.session.commit()
+
+class DjangoFixtureRunner(FixtureRunner):
+    def apply_fixture(self, fixture):
+        for _ in range(fixture.quantity):
+            model_instance = fixture.model()
+            for field, (generator, options) in fixture.fields.items():
+                setattr(model_instance, field, generator(**options).generate())
+            model_instance.save()

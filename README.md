@@ -1,12 +1,12 @@
 # white-noise
 
-Test Data generator for SQLAlchemy (and possibly Django)
+Test Data generator for SQLAlchemy and Django
 
 This package is designed to make it easy to generate test data for SQLAlchemy
-applications (Django possibly to come in the future). It was inspired after spending
+or Django applications. It was inspired after spending
 most of a day failing to get Mixer working properly.
 
-The aim is to have a (mostly) consistant api for all generation.
+The aim is to have a consistant, simple API for all generation.
 
 ## API overview
 Fixtures define the data that should be entered into the database. Generators
@@ -59,5 +59,12 @@ it must receive an SQLAlchemy session object as well as its options)
 
 ### Fixture runners
 
-Currently only the *SQLAlchemy* Fixture Runner is available. This requires a reference to
-an SQLAlchemy session object, and a list of fixtures
+#### SQLAlchemyFixtureRunner
+
+Runs the fixtures using SQLAlchemy models. This class must be instantiated with
+a reference to a SQLAlchemy session object to be used for accessing the database
+
+#### DjangoFixtureRunner
+
+Runs the fixtures against a Django database. It must be run in a django context
+(e.g. from a custom management command)
