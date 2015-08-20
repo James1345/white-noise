@@ -41,6 +41,10 @@ Creates a random string for the field
 
 - **length** The length of the field
 
+#### LipsumGenerator
+
+Creates a semi-random string sentence of the Lorem Ipsum form
+
 #### InsultGenerator
 
 Creates a random insulting sentence  string for the field
