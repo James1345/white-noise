@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 
 from whitenoise.fixtures import SQLAlchemyFixtureRunner, Fixture
-from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator
+from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator, SequenceGenerator
 
 Base = declarative_base()
 
@@ -19,7 +19,7 @@ random_user = Fixture(
         model = User,
         quantity = 6,
         fields = {
-            'name': (RandomGenerator, {}),
+            'name': RandomGenerator(),
         }
     )
 
@@ -28,7 +28,7 @@ insult_user = Fixture(
         model = User,
         quantity = 3,
         fields = {
-            'name': (InsultGenerator, {}),
+            'name': InsultGenerator(),
         }
     )
 
@@ -37,9 +37,18 @@ literal_user = Fixture(
         model = User,
         quantity = 4,
         fields = {
-            'name': (LiteralGenerator, {'value': 'Hello World'}),
+            'name': LiteralGenerator(value='Hello World'),
         }
     )
+
+sequenced_user = Fixture(
+        dependencies = [random_user, literal_user],
+        model = User,
+        quantity = 4,
+        fields = {
+            'name': SequenceGenerator(values=['Alice', 'Bob', 'Charlie']),
+        }
+)
 
 class SQLAlchemyTest(TestCase):
 
@@ -51,6 +60,7 @@ class SQLAlchemyTest(TestCase):
 
     def testFixtures(self):
         fixtures = [
+            sequenced_user,
             random_user,
             literal_user,
             insult_user,
