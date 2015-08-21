@@ -47,6 +47,42 @@ class SequenceGenerator(BaseGenerator):
             self.iterator = iter(self.values)
             return next(self.iterator)
 
+class ListGenerator(BaseGenerator):
+    '''
+    Creates a list of values by running another generator (or multiple generators)
+
+    The entire list is assigned to a single instance of the model, not to be
+    confused with SequenceGenerator which returns a single result each time
+    it is run.
+    '''
+
+    def __init__(self, length, *generators, **kwargs):
+        self.length=length
+        self.generators = generators
+
+    def __setattr__(self, field, value):
+        '''
+        Pass attribute settings through to children
+        '''
+        super().__setattr__(field, value)
+        try:
+            for generator in self.generators:
+                setattr(generator, field, value)
+        except:
+            pass #Pass when generators does not exist
+
+    def generate(self):
+        iterator = iter(self.generators)
+        retval = []
+        for _ in range(self.length):
+            try:
+                val = next(iterator).generate()
+            except StopIteration:
+                iterator = iter(self.generators)
+                val = next(iterator).generate()
+            retval.append(val)
+        return retval
+
 
 class LiteralGenerator(BaseGenerator):
     def __init__(self, value=None, *args, **kwargs):

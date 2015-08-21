@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
 from whitenoise.fixtures import SQLAlchemyFixtureRunner, Fixture
-from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator, SequenceGenerator, sqlalchemy
+from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator, SequenceGenerator, sqlalchemy, ListGenerator
 
 Base = declarative_base()
 
@@ -69,6 +69,23 @@ user_address = Fixture(
     }
 )
 
+blank_address = Fixture(
+    dependencies = [],
+    model = Address,
+    quantity = 1,
+    fields = {}
+)
+
+back_user = Fixture(
+    dependencies = [blank_address],
+    model = User,
+    quantity = 1,
+    fields = {
+        'name': LiteralGenerator(value='Back User'),
+        'adresses': ListGenerator(1, sqlalchemy.SelectGenerator(model=Address))
+    }
+)
+
 class SQLAlchemyTest(TestCase):
 
     @classmethod
@@ -79,6 +96,7 @@ class SQLAlchemyTest(TestCase):
 
     def testFixtures(self):
         fixtures = [
+            back_user,
             sequenced_user,
             random_user,
             literal_user,
