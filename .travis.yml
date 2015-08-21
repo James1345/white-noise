@@ -4,4 +4,4 @@ python:
 install:
   - "pip install -r requirements/common.pip"
   - "pip install -r requirements/dev.pip"
-script: nosetests
+script: nosetests -s
