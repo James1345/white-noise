@@ -1,4 +1,5 @@
 # white-noise
+[![Build Status](https://travis-ci.org/James1345/white-noise.svg?branch=develop)](https://travis-ci.org/James1345/white-noise)
 
 Test Data generator for SQLAlchemy and Django
 
@@ -78,3 +79,6 @@ a reference to a SQLAlchemy session object to be used for accessing the database
 
 Runs the fixtures against a Django database. It must be run in a django context
 (e.g. from a custom management command)
+
+A Django management command is included. To use it, add `'whitenoise'` to your
+installed apps
