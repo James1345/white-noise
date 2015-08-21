@@ -1,5 +1,5 @@
 # white-noise
-[![Build Status](https://travis-ci.org/James1345/white-noise.svg?branch=feature%2Fdjango-management-command)](https://travis-ci.org/James1345/white-noise)
+[![Build Status](https://travis-ci.org/James1345/white-noise.svg?branch=develop)](https://travis-ci.org/James1345/white-noise)
 
 Test Data generator for SQLAlchemy and Django
 

@@ -1,11 +1,11 @@
 from unittest import TestCase
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import sessionmaker, relationship, backref
 
 from whitenoise.fixtures import SQLAlchemyFixtureRunner, Fixture
-from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator, SequenceGenerator
+from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator, SequenceGenerator, sqlalchemy
 
 Base = declarative_base()
 
@@ -13,6 +13,16 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String)
+
+class Address(Base):
+    __tablename__ = 'addresses'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+
+    user = relationship("User", backref=backref('adresses', order_by=id))
+
+    def __repr__(self):
+        return "<Address - id:%d user_id:%d>" % (self.id, self.user_id)
 
 random_user = Fixture(
         dependencies = [],
@@ -50,6 +60,15 @@ sequenced_user = Fixture(
         }
 )
 
+user_address = Fixture(
+    dependencies = [sequenced_user],
+    model = Address,
+    quantity = 1,
+    fields = {
+        'user': sqlalchemy.SelectGenerator(model=User) #select a random user
+    }
+)
+
 class SQLAlchemyTest(TestCase):
 
     @classmethod
@@ -64,7 +83,11 @@ class SQLAlchemyTest(TestCase):
             random_user,
             literal_user,
             insult_user,
+            user_address,
         ]
         SQLAlchemyFixtureRunner(self.session, fixtures).run()
+
         for instance in self.session.query(User):
             print(instance.name)
+        for instance in self.session.query(Address):
+            print(instance)

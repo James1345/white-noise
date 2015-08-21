@@ -19,7 +19,7 @@ class SelectGenerator(BaseGenerator):
     def generate(self):
         if(self.session is None):
             raise ValueError('You must set the session property before using this generator')
-        _query = self.session.query(model).all()
+        _query = self.session.query(self.model).all()
         if self.random:
             return random.SystemRandom().choice(_query)
         else:
