@@ -89,15 +89,12 @@ back_user = Fixture(
     }
 )
 
-def uuid_str():
-    return str(uuid.uuid4())
-
 uuid_user = Fixture(
     dependencies = [],
     model = User,
     quantity = 1,
     fields = {
-        'name': uuid_str
+        'name': lambda: str(uuid.uuid4())
     }
 
 )
