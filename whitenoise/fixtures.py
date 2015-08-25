@@ -1,6 +1,12 @@
 import inspect
 from whitenoise.generators import FunctionGenerator, LiteralGenerator
 
+def fixture(arg):
+    if isinstance(arg, Fixture):
+        return arg
+    else:
+        return Fixture(**arg)
+
 class Fixture:
     '''
     Fixture takes the name of a model to act on,
@@ -8,7 +14,7 @@ class Fixture:
     and a dict of fields and generators
     '''
 
-    def __init__(self, dependencies, model, quantity, fields):
+    def __init__(self, model, dependencies=[], quantity=1, fields={}):
         self.dependencies = dependencies
         self.model = model
         self.quantity = quantity
@@ -26,6 +32,9 @@ class Fixture:
         '''
         retval = {}
         for key, value in fields.items():
+            retval[key] = generator(value)
+        return retval
+
             try:
                 callable(value.generate)
                 retval[key] = value
