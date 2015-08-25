@@ -64,6 +64,7 @@ class SQLAlchemyFixtureRunner(FixtureRunner):
     def __init__(self, session, fixtures):
         super().__init__(fixtures)
         self.session = session
+        self.session.autoflush = False
 
     def apply_fixture(self, fixture):
         for _ in range(fixture.quantity):
@@ -72,6 +73,7 @@ class SQLAlchemyFixtureRunner(FixtureRunner):
                 generator.session = self.session
                 setattr(model_instance, field, generator.generate())
             self.session.add(model_instance)
+            self.session.flush()
             self.session.commit()
 
 class DjangoFixtureRunner(FixtureRunner):
