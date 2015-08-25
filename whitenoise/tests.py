@@ -5,7 +5,10 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
 from whitenoise.fixtures import SQLAlchemyFixtureRunner, Fixture
-from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator, SequenceGenerator, sqlalchemy, ListGenerator
+from whitenoise.generators import LiteralGenerator, SequenceGenerator, sqlalchemy, ListGenerator
+from whitenoise.shortcuts import RANDOM, INSULT
+
+import uuid
 
 Base = declarative_base()
 
@@ -29,7 +32,7 @@ random_user = Fixture(
         model = User,
         quantity = 6,
         fields = {
-            'name': RandomGenerator(10),
+            'name': RANDOM,
         }
     )
 
@@ -38,7 +41,7 @@ insult_user = Fixture(
         model = User,
         quantity = 3,
         fields = {
-            'name': InsultGenerator(),
+            'name': INSULT,
         }
     )
 
@@ -47,7 +50,7 @@ literal_user = Fixture(
         model = User,
         quantity = 4,
         fields = {
-            'name': LiteralGenerator(value='Hello World'),
+            'name': 'Hello World',
         }
     )
 
@@ -81,9 +84,22 @@ back_user = Fixture(
     model = User,
     quantity = 1,
     fields = {
-        'name': LiteralGenerator(value='Back User'),
+        'name': 'Back User',
         'adresses': ListGenerator(1, sqlalchemy.SelectGenerator(model=Address))
     }
+)
+
+def uuid_str():
+    return str(uuid.uuid4())
+
+uuid_user = Fixture(
+    dependencies = [],
+    model = User,
+    quantity = 1,
+    fields = {
+        'name': uuid_str
+    }
+
 )
 
 class SQLAlchemyTest(TestCase):
@@ -102,6 +118,7 @@ class SQLAlchemyTest(TestCase):
             literal_user,
             insult_user,
             user_address,
+            uuid_user,
         ]
         SQLAlchemyFixtureRunner(self.session, fixtures).run()
 

@@ -1,3 +1,5 @@
+import inspect
+from whitenoise.generators import FunctionGenerator, LiteralGenerator
 
 class Fixture:
     '''
@@ -10,7 +12,33 @@ class Fixture:
         self.dependencies = dependencies
         self.model = model
         self.quantity = quantity
-        self.fields = fields
+        self.fields = self.compile_fields(fields)
+
+    def compile_fields(self, fields):
+        '''
+        Shortcut helper.
+        This method inspects the parameter passed to the field, and constructs
+        an appropriate generator for it
+
+        If a generator is passed, it is assigned. If a function that can be
+        called without arguments is assigned, FunctionGenerator is used, otherwise
+        a LiteralGenerator is constructed.
+        '''
+        retval = {}
+        for key, value in fields.items():
+            try:
+                callable(value.generate)
+                retval[key] = value
+            except AttributeError:
+                if callable(value):
+                    argspec = inspect.getargspec(value)
+                    if len(argspec.args) == 0 or (len(argspec.args) == len(argspec.defaults)):
+                        retval[key] = FunctionGenerator(value)
+                    else:
+                        raise ValueError("Function must be callable with no args to use this way")
+                else:
+                    retval[key] = LiteralGenerator(value)
+        return retval
 
 class CircularDependancyException(Exception):
     pass
