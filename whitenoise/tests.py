@@ -5,7 +5,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
 from whitenoise.fixtures import SQLAlchemyFixtureRunner, Fixture
-from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator, SequenceGenerator, sqlalchemy, ListGenerator
+from whitenoise.generators import LiteralGenerator, SequenceGenerator, sqlalchemy, ListGenerator
+from whitenoise.shortcuts import RANDOM, INSULT
 
 Base = declarative_base()
 
@@ -29,7 +30,7 @@ random_user = Fixture(
         model = User,
         quantity = 6,
         fields = {
-            'name': RandomGenerator(10),
+            'name': RANDOM,
         }
     )
 
@@ -38,7 +39,7 @@ insult_user = Fixture(
         model = User,
         quantity = 3,
         fields = {
-            'name': InsultGenerator(),
+            'name': INSULT,
         }
     )
 
