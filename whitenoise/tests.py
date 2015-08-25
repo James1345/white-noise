@@ -29,7 +29,7 @@ random_user = Fixture(
         model = User,
         quantity = 6,
         fields = {
-            'name': RandomGenerator(),
+            'name': RandomGenerator(10),
         }
     )
 

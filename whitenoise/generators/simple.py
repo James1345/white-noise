@@ -6,27 +6,50 @@ from loremipsum import get_sentence
 from whitenoise.random import random_string
 
 class BaseGenerator:
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         pass #ignore superfluous args
 
     def generate(self):
         raise NotImplementedError("Must be implemented by subclass")
 
-class InsultGenerator(BaseGenerator):
-    def generate(self):
-        return get_so_insult_with_action_and_target('Yo Moma', 'she')
+class FunctionGenerator(BaseGenerator):
+    '''
+    Generator that takes a function and runs it once per call to
+    #generate.
 
-class RandomGenerator(BaseGenerator):
-    def __init__(self, length=10, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.length = length
+    The extra arguments will be passed to the function when it is called
+    '''
+
+    def __init__(self, function, *function_args, **function_kwargs):
+        self.function = function
+        self.function_args = function_args
+        self.function_kwargs = function_kwargs
 
     def generate(self):
-        return random_string(self.length)
+        return self.function(*self.function_args, **self.function_kwargs)
 
-class LipsumGenerator(BaseGenerator):
-    def generate(self):
-        return get_sentence(True)
+def InsultGenerator():
+    '''
+    Insult generator
+
+    So specific it can actually be managed as an instance of function generator
+    '''
+    return FunctionGenerator(get_so_insult_with_action_and_target, 'Yo Moma', 'she')
+
+class RandomGenerator(FunctionGenerator):
+    '''
+    Uses function generator to create a random string of the given length
+    '''
+    def __init__(self, length):
+        super().__init__(random_string, length)
+
+def LipsumGenerator():
+    '''
+    Lorem Ipsum generator
+
+    So specific it can actually be managed as an instance of function generator
+    '''
+    return FunctionGenerator(get_sentence, True)
 
 class SequenceGenerator(BaseGenerator):
     '''
@@ -35,10 +58,9 @@ class SequenceGenerator(BaseGenerator):
     If it runs out, it wraps back to the start.
     Any iterable may be passed as `values`
     '''
-    def __init__(self, values, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, values):
         self.values = values
-        self.iterator = iter(self.values)
+        self.iterator = iter(values)
 
     def generate(self):
         try:
@@ -56,7 +78,7 @@ class ListGenerator(BaseGenerator):
     it is run.
     '''
 
-    def __init__(self, length, *generators, **kwargs):
+    def __init__(self, length, *generators):
         self.length=length
         self.generators = generators
 
@@ -85,8 +107,7 @@ class ListGenerator(BaseGenerator):
 
 
 class LiteralGenerator(BaseGenerator):
-    def __init__(self, value=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, value=None):
         self.value = value
 
     def generate(self):
