@@ -1,5 +1,4 @@
-import inspect
-from whitenoise.generators import FunctionGenerator, LiteralGenerator
+from whitenoise.generators import generator
 
 class Fixture:
     '''
@@ -8,36 +7,16 @@ class Fixture:
     and a dict of fields and generators
     '''
 
-    def __init__(self, dependencies, model, quantity, fields):
+    def __init__(self, model, dependencies=[], quantity=1, fields={}):
         self.dependencies = dependencies
         self.model = model
         self.quantity = quantity
-        self.fields = self.compile_fields(fields)
+        self.fields = self._compile_fields(fields)
 
-    def compile_fields(self, fields):
-        '''
-        Shortcut helper.
-        This method inspects the parameter passed to the field, and constructs
-        an appropriate generator for it
-
-        If a generator is passed, it is assigned. If a function that can be
-        called without arguments is assigned, FunctionGenerator is used, otherwise
-        a LiteralGenerator is constructed.
-        '''
+    def _compile_fields(self, fields):
         retval = {}
         for key, value in fields.items():
-            try:
-                callable(value.generate)
-                retval[key] = value
-            except AttributeError:
-                if callable(value):
-                    argspec = inspect.getargspec(value)
-                    if len(argspec.args) == 0 or (len(argspec.args) == len(argspec.defaults)):
-                        retval[key] = FunctionGenerator(value)
-                    else:
-                        raise ValueError("Function must be callable with no args to use this way")
-                else:
-                    retval[key] = LiteralGenerator(value)
+            retval[key] = generator(value)
         return retval
 
 class CircularDependancyException(Exception):
@@ -50,13 +29,13 @@ class DependencyResolver:
     def __init__(self, fixtures):
         self.fixtures = fixtures
 
-    def recurse_resolve(self, node, resolved, unresolved):
+    def _recurse_resolve(self, node, resolved, unresolved):
         if node not in resolved:
             unresolved.append(node)
             for edge in node.dependencies:
                 if edge in unresolved:
                     raise CircularDependancyException("Circular dependancy detected %s" % edge)
-                self.recurse_resolve(edge, resolved, unresolved)
+                self._recurse_resolve(edge, resolved, unresolved)
             unresolved.remove(node)
             resolved.append(node)
 
@@ -64,18 +43,21 @@ class DependencyResolver:
         resolved = []
         unresolved = []
         for fixture in self.fixtures:
-            self.recurse_resolve(fixture, resolved, unresolved)
+            self._recurse_resolve(fixture, resolved, unresolved)
         return resolved
 
 
 class FixtureRunner:
     '''
     Takes a list of Fixtures and runs them on the specified connection
+
+    Fixtures may be listed as either Fixture objects or as dicts.
+    If a dict is used it will be passed as arguments to a Fixture constructor
+    by this class
     '''
 
     def __init__(self, fixtures):
-
-        self.fixtures = DependencyResolver(fixtures).get_ordered_set()
+        self.fixtures = DependencyResolver(self._normalize_fixtures(fixtures)).get_ordered_set()
         if type(self) == FixtureRunner:
             # Disallow creation of the base class
             raise NotImplementedError("FixtureRunner MUST be subclassed")
@@ -85,7 +67,16 @@ class FixtureRunner:
             self.apply_fixture(fixture)
 
     def apply_fixture(self, fixture):
-        raise NotImplementedError()
+        raise NotImplementedError("Subclasses must implement the application of each fixture")
+
+    def _normalize_fixtures(self, fixtures):
+        retval = []
+        for fixture in fixtures:
+            if isinstance(fixture, Fixture):
+                retval.append(fixture)
+            else:
+                retval.append(Fixture(**fixture))
+        return retval
 
 class SQLAlchemyFixtureRunner(FixtureRunner):
 

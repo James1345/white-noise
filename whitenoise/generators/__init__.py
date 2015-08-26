@@ -1,1 +1,5 @@
-from whitenoise.generators.simple import * #Expose simple generators at this level
+import inspect
+
+from whitenoise.generators.simple import *
+from whitenoise.generators.list import *
+from whitenoise.generators.generator import generator
