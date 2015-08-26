@@ -36,14 +36,13 @@ random_user = Fixture(
         }
     )
 
-insult_user = Fixture(
-        dependencies = [],
-        model = User,
-        quantity = 3,
-        fields = {
-            'name': INSULT,
-        }
-    )
+insult_user = {
+    'model': User,
+    'quantity': 3,
+    'fields': {
+        'name': INSULT,
+    }
+}
 
 literal_user = Fixture(
         dependencies = [],
@@ -59,7 +58,7 @@ sequenced_user = Fixture(
         model = User,
         quantity = 4,
         fields = {
-            'name': SequenceGenerator(values=['Alice', 'Bob', 'Charlie']),
+            'name': ['Alice', 'Bob', 'Charlie', lambda: 'Danny'],
         }
 )
 
@@ -85,7 +84,7 @@ back_user = Fixture(
     quantity = 1,
     fields = {
         'name': 'Back User',
-        'adresses': ListGenerator(1, sqlalchemy.SelectGenerator(model=Address))
+        'adresses': ListGenerator(1, (sqlalchemy.SelectGenerator(model=Address),))
     }
 )
 

@@ -1,5 +1,5 @@
-from whitenoise.generators.simple import * #Expose simple generators at this level
+import inspect
 
-def generator(arg):
-    if instanceof(arg, BaseGenerator):
-        return arg
+from whitenoise.generators.simple import *
+from whitenoise.generators.list import *
+from whitenoise.generators.generator import generator
