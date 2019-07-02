@@ -46,6 +46,6 @@ class LinkGenerator(BaseGenerator):
             raise ValueError('You must set the session property before using this generator')
         _query = self.session.query(self.model).all()
         if self.random:
-            return random.SystemRandom().sample(_query,random.randint(1, max_map))
+            return random.SystemRandom().sample(_query,random.randint(1, self.max_map))
         else:
             return [_query[0]]
