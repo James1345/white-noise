@@ -1,5 +1,6 @@
 import random
 from whitenoise.generators import BaseGenerator
+from sqlalchemy.inspection import inspect
 
 class SelectGenerator(BaseGenerator):
     '''
@@ -32,6 +33,7 @@ class LinkGenerator(BaseGenerator):
     the SQLAlchemy fixture runner handles this for us
     Receives the name of another class to lookup and max_map determines the maximum number of
     associations to create (default is 1)
+    unique_maps will ensure no association used in a prior object creation is used for a new instance. (Default is False)
     If the query returns more than one option, either random or the 1st is selected
     (default is random)
     '''
@@ -49,18 +51,25 @@ class LinkGenerator(BaseGenerator):
     def generate(self):
         if(self.session is None):
             raise ValueError('You must set the session property before using this generator')
-        if not self.model in LinkGenerator._query.keys:
-            LinkGenerator._query[self.model] = self.session.query(self.model).all()
+        if not str(self.model) in LinkGenerator._query.keys():
+            LinkGenerator._query[str(self.model)] = self.session.query(self.model).all()
         if self.random:
             if self.unique_maps:
                 while True:
-                    iterList = random.SystemRandom().sample(LinkGenerator._query[self.model],random.randint(1, self.max_map))
-                    iterCheck = any(elem in iterList for elem in LinkGenerator._chosen_map[self.model])
-                    if not iterCheck:
-                        LinkGenerator._chosen_map[self.model].extend(iterList)
-                        break
+                    iterExists = False
+                    iterList = random.SystemRandom().sample(LinkGenerator._query[str(self.model)],random.randint(1, self.max_map))
+                    pkList = []
+                    for elem in iterList:
+                        pkList.append(inspect(elem).identity)
+                    if str(self.model) in LinkGenerator._chosen_map.keys():
+                        iterExists = any(elem in pkList for elem in LinkGenerator._chosen_map[str(self.model)])
+                        if not iterExists:
+                            LinkGenerator._chosen_map[str(self.model)].extend(pkList)
+                            break
+                    else:
+                        LinkGenerator._chosen_map[str(self.model)] = pkList
                 return iterList 
             else:
-                return random.SystemRandom().sample(LinkGenerator._query[self.model],random.randint(1, self.max_map))
+                return random.SystemRandom().sample(LinkGenerator._query[str(self.model)],random.randint(1, self.max_map))
         else:
-            return [LinkGenerator._query[self.model][0]]
+            return [LinkGenerator._query[str(self.model)][0]]
