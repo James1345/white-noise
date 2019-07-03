@@ -35,8 +35,8 @@ class LinkGenerator(BaseGenerator):
     If the query returns more than one option, either random or the 1st is selected
     (default is random)
     '''
-    _query = []
-    _chosen_map = []
+    _query = {}
+    _chosen_map = {}
 
     def __init__(self, model, max_map=1, unique_maps=False, random=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -49,18 +49,18 @@ class LinkGenerator(BaseGenerator):
     def generate(self):
         if(self.session is None):
             raise ValueError('You must set the session property before using this generator')
-        if not LinkGenerator._query:
-            LinkGenerator._query = self.session.query(self.model).all()
+        if not self.model in LinkGenerator._query.keys:
+            LinkGenerator._query[self.model] = self.session.query(self.model).all()
         if self.random:
             if self.unique_maps:
                 while True:
-                    iterList = random.SystemRandom().sample(LinkGenerator._query,random.randint(1, self.max_map))
-                    iterCheck = any(elem in iterList for elem in LinkGenerator._chosen_map)
+                    iterList = random.SystemRandom().sample(LinkGenerator._query[self.model],random.randint(1, self.max_map))
+                    iterCheck = any(elem in iterList for elem in LinkGenerator._chosen_map[self.model])
                     if not iterCheck:
-                        LinkGenerator._chosen_map.extend(iterList)
+                        LinkGenerator._chosen_map[self.model].extend(iterList)
                         break
                 return iterList 
             else:
-                return random.SystemRandom().sample(LinkGenerator._query,random.randint(1, self.max_map))
+                return random.SystemRandom().sample(LinkGenerator._query[self.model],random.randint(1, self.max_map))
         else:
-            return [LinkGenerator._query[0]]
+            return [LinkGenerator._query[self.model][0]]
