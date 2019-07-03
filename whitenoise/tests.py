@@ -5,7 +5,10 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref
 
 from whitenoise.fixtures import SQLAlchemyFixtureRunner, Fixture
-from whitenoise.generators import RandomGenerator, InsultGenerator, LiteralGenerator, SequenceGenerator, sqlalchemy, ListGenerator
+from whitenoise.generators import LiteralGenerator, SequenceGenerator, sqlalchemy, ListGenerator
+from whitenoise.shortcuts import RANDOM, INSULT
+
+import uuid
 
 Base = declarative_base()
 
@@ -29,25 +32,24 @@ random_user = Fixture(
         model = User,
         quantity = 6,
         fields = {
-            'name': RandomGenerator(),
+            'name': RANDOM,
         }
     )
 
-insult_user = Fixture(
-        dependencies = [],
-        model = User,
-        quantity = 3,
-        fields = {
-            'name': InsultGenerator(),
-        }
-    )
+insult_user = {
+    'model': User,
+    'quantity': 3,
+    'fields': {
+        'name': INSULT,
+    }
+}
 
 literal_user = Fixture(
         dependencies = [],
         model = User,
         quantity = 4,
         fields = {
-            'name': LiteralGenerator(value='Hello World'),
+            'name': 'Hello World',
         }
     )
 
@@ -56,7 +58,7 @@ sequenced_user = Fixture(
         model = User,
         quantity = 4,
         fields = {
-            'name': SequenceGenerator(values=['Alice', 'Bob', 'Charlie']),
+            'name': ['Alice', 'Bob', 'Charlie', lambda: 'Danny'],
         }
 )
 
@@ -81,9 +83,19 @@ back_user = Fixture(
     model = User,
     quantity = 1,
     fields = {
-        'name': LiteralGenerator(value='Back User'),
-        'adresses': ListGenerator(1, sqlalchemy.SelectGenerator(model=Address))
+        'name': 'Back User',
+        'adresses': ListGenerator(1, (sqlalchemy.SelectGenerator(model=Address),))
     }
+)
+
+uuid_user = Fixture(
+    dependencies = [],
+    model = User,
+    quantity = 1,
+    fields = {
+        'name': lambda: str(uuid.uuid4())
+    }
+
 )
 
 class SQLAlchemyTest(TestCase):
@@ -102,6 +114,7 @@ class SQLAlchemyTest(TestCase):
             literal_user,
             insult_user,
             user_address,
+            uuid_user,
         ]
         SQLAlchemyFixtureRunner(self.session, fixtures).run()
 

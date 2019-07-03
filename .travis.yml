@@ -3,5 +3,5 @@ python:
   - 3.4
 install:
   - "pip install -r requirements/common.pip"
-  - "pip install -r requirements/dev.pip"
+  - "pip install -r requirements/dev-test.pip"
 script: nosetests -s -q
