@@ -68,7 +68,7 @@ it must receive an SQLAlchemy session object as well as its options)
 - **random** Select randomly or select the first (default => random)
 
 #### sqlalchemy.LinkGenerator
-Selects a list of object from the database and uses that as the value for the field
+Selects a list of objects from the database and uses that as the value for the field
 This is for creating objects with many-to-many relationships to others in the database (e.g. link tables/association tables)
 
 This generator only works with the SQLAlchemy fixture runner. (if writting your own fixture runner
@@ -79,6 +79,10 @@ it must receive an SQLAlchemy session object as well as its options)
 - **random** Select randomly or select the first (default => random)
 
 - **max_map** Select randomly up to max_map associations (default -> 1)
+
+- **unique_maps** Generate unique map using memory of previously chosen association maps. (default => False)
+
+- **max_iter** Limit the number of iterations for searching unique map. (default -> 100)
 
 
 ### Fixture runners
